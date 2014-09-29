@@ -21,6 +21,7 @@ public class pb_Sample
 
 	public pb_Sample parent;
 	public List<pb_Sample> children = new List<pb_Sample>();
+	public int sampleCount  { get { return  (times.Count-1) - timeIndex; } }
 
 	public pb_Sample(string name, pb_Sample parent)
 	{
@@ -139,7 +140,7 @@ public class pb_Sample
 
 #region Math	///< Could just use Linq for this, but maybe performance would be an issue?
 
-	private float Average()
+	public float Average()
 	{
 		float avg = 0f;
 		int completed = (times.Count-1) - timeIndex;
@@ -150,15 +151,22 @@ public class pb_Sample
 		return avg /= (float)completed;
 	}
 
-	private float Sum()
+	public float Sum()
 	{
 		float sum = 0f;
-		int completed = (times.Count-1) - timeIndex;
 
-		for(int i = 0; i < completed; i++)
+		for(int i = 0; i < sampleCount; i++)
 			sum += times[i];
 
 		return sum;
+	}
+
+	public float Percentage()
+	{
+		if(parent == null || parent.sampleCount < 1)
+			return 100f;
+		else
+			return (Sum() / parent.Sum()) * 100f;
 	}
 #endregion
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Diagnostics;
-using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 /**
@@ -8,14 +8,19 @@ using System.Text;
  */
 public class pb_Profiler
 {
+	static List<pb_Profiler> _activeProfilers = new List<pb_Profiler>();
+	public static List<pb_Profiler> activeProfilers { get { return _activeProfilers; } }
+
 	/**
 	 * Constructor...
 	 */
 	public pb_Profiler()
 	{
+		if(!activeProfilers.Contains(this))
+			activeProfilers.Add(this);
 	}
 
-	pb_Sample sample = new pb_Sample("Parent", null);	///< The current sample tree.
+	pb_Sample sample = new pb_Sample("Parent", null);						///< The current sample tree.
 
 	/**
 	 * Begin a profile sample.
@@ -51,12 +56,7 @@ public class pb_Profiler
 	 */
 	public override string ToString()
 	{
-		pb_Sample root = sample;
-
-		while(root.parent != null)
-		{
-			root = root.parent;
-		}
+		pb_Sample root = GetRootSample();
 
 		System.Text.StringBuilder sb = new System.Text.StringBuilder();
 		for(int i = 0; i < root.children.Count; i++)
@@ -64,4 +64,19 @@ public class pb_Profiler
 
 		return sb.ToString();
 	}	
+
+	/**
+	 * Returns the parent sample of this profiler tree.
+	 */
+	public pb_Sample GetRootSample()
+	{
+		pb_Sample root = this.sample;
+
+		while(root.parent != null)
+		{
+			root = root.parent;
+		}
+
+		return root;
+	}
 }
