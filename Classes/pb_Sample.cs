@@ -12,29 +12,41 @@ using UnityEditor;
  * you'd want to use the bindings in pb_Profiler instead of calling
  * anything in here directly.
  */
+namespace Parabox.Debug {
+
 public class pb_Sample
 {
 	public string name;
 
-	internal int timeIndex = -1;
-	List<float> times = new List<float>();
+	const int MAX_STACKED_SAMPLES = 32;
+
+	internal int timeIndex = 0;
+	internal int concurrentSamples = -1;
+	float[] times = new float[MAX_STACKED_SAMPLES];
 
 	public pb_Sample parent;
 	public List<pb_Sample> children = new List<pb_Sample>();
-	public int sampleCount  { get { return  (times.Count-1) - timeIndex; } }
+	public int sampleCount { get; private set; }
+	public float sum { get; private set; }
+	public float average { get; private set; }
 
 	public pb_Sample(string name, pb_Sample parent)
 	{
 		this.name = name;
 		this.parent = parent;
 
+		timeIndex = 0;
+		concurrentSamples = 0;	// 0 because one sample is automatically started
+
 		#if UNITY_EDITOR
-		this.times.Add( (float)EditorApplication.timeSinceStartup );		///< @todo Use System.Diagnostics.Stopwatch instead.
+		this.times[timeIndex] = (float)EditorApplication.timeSinceStartup;		///< @todo Use System.Diagnostics.Stopwatch instead.
 		#else
-		this.times.Add( (float)Time.realtimeSinceStartup );
+		this.times[timeIndex] = (float)Time.realtimeSinceStartup;
 		#endif
 
-		timeIndex++;
+		sampleCount = 0;
+		sum = 0f;
+		average = 0f;
 	}
 
 	/**
@@ -42,7 +54,7 @@ public class pb_Sample
 	 */
 	public bool Complete()
 	{
-		return timeIndex < 0;
+		return concurrentSamples < 0;
 	}
 
 	/**
@@ -55,15 +67,22 @@ public class pb_Sample
 		{
 			int ind = children.FindIndex(x => x.name.Equals(name));
 
+			// A sample with this name is already running - add this time to the concurrent
+			// time array
 			if(ind > -1)
 			{
+				int t_timeIndex = children[ind].timeIndex + 1;
+				if (t_timeIndex > MAX_STACKED_SAMPLES-1)
+					t_timeIndex = 0;
+
 				#if UNITY_EDITOR
-				children[ind].times.Add( (float)EditorApplication.timeSinceStartup );
+				children[ind].times[t_timeIndex] = (float)EditorApplication.timeSinceStartup;
 				#else
-				children[ind].times.Add( (float)Time.realtimeSinceStartup );
+				children[ind].times[t_timeIndex] = (float)Time.realtimeSinceStartup;
 				#endif
 
-				children[ind].timeIndex++;
+				children[ind].timeIndex = t_timeIndex;
+				children[ind].concurrentSamples++;
 
 				return children[ind];
 			}
@@ -79,23 +98,39 @@ public class pb_Sample
 	 */
 	public pb_Sample Stop()
 	{
-		int c = times.Count-1;
+		int c = Wrap(timeIndex - concurrentSamples, 0, MAX_STACKED_SAMPLES);
+
+		concurrentSamples--;
 
 		#if UNITY_EDITOR
-		times[c - timeIndex] = (float)EditorApplication.timeSinceStartup - times[c - timeIndex];
+		times[c] = (float)EditorApplication.timeSinceStartup - times[c];
 		#else
-		times[c - timeIndex] = (float)Time.realtimeSinceStartup - times[c - timeIndex];
+		times[c] = (float)Time.realtimeSinceStartup - times[c];
 		#endif
 
-		timeIndex--;
+		sampleCount++;
+		sum += times[c];
+		average = sum / sampleCount;
 
-		return timeIndex < 0 ? (this.parent ?? this) : this;
+		return concurrentSamples < 0 ? (this.parent ?? this) : this;
+	}
+
+	// Deceptively difficult problem!
+	// http://stackoverflow.com/questions/707370/clean-efficient-algorithm-for-wrapping-integers-in-c
+	int Wrap(int value, int kLowerBound, int kUpperBound)
+	{
+		int range_size = kUpperBound - kLowerBound + 1;
+
+		if (value < kLowerBound)
+			value += range_size * ((kLowerBound - value) / range_size + 1);
+
+		return kLowerBound + (value - kLowerBound) % range_size;
 	}
 
 	public void Clear()
 	{	
-		times.Clear();
-		timeIndex = -1;
+		timeIndex = 0;
+		concurrentSamples = -1;
 
 		for(int i = 0; i < this.children.Count; i++)
 			this.children[i].Clear();
@@ -108,7 +143,7 @@ public class pb_Sample
 	 */
 	public override string ToString()
 	{
-		return this.name + ": " + Average() + "\nSamples: " + times.Count;
+		return this.name + ": " + average + "\nSamples: " + sampleCount;
 	}
 
 	/**
@@ -121,12 +156,10 @@ public class pb_Sample
 
 	private string ToStringRecursive(string tabs, bool first)
 	{
-		float sum = Sum();
-
 		StringBuilder sb = new StringBuilder();
-		sb.AppendLine(	tabs + this.name + ": " + times.Count + "\n" +
-						tabs + "Average: " + Average() + "\n" + 
-						tabs + "Percentage: " + (first ? 100f : (sum / parent.Sum()) * 100f).ToString("F2") + "%\n" + 
+		sb.AppendLine(	tabs + this.name + ": " + sampleCount + "\n" +
+						tabs + "Average: " + average + "\n" + 
+						tabs + "Percentage: " + (first ? 100f : (sum / parent.sum) * 100f).ToString("F2") + "%\n" + 
 						tabs + "Sum: " + sum );
 
 		for(int i = 0; i < children.Count; i++)
@@ -140,33 +173,13 @@ public class pb_Sample
 
 #region Math	///< Could just use Linq for this, but maybe performance would be an issue?
 
-	public float Average()
-	{
-		float avg = 0f;
-		int completed = (times.Count-1) - timeIndex;
-
-		for(int i = 0; i < completed; i++)
-			avg += times[i];
-
-		return avg /= (float)completed;
-	}
-
-	public float Sum()
-	{
-		float sum = 0f;
-
-		for(int i = 0; i < sampleCount; i++)
-			sum += times[i];
-
-		return sum;
-	}
-
 	public float Percentage()
 	{
 		if(parent == null || parent.sampleCount < 1)
 			return 100f;
 		else
-			return (Sum() / parent.Sum()) * 100f;
+			return (sum / parent.sum) * 100f;
 	}
 #endregion
+}
 }

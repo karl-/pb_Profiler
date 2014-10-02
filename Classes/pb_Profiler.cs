@@ -6,6 +6,8 @@ using System.Text;
 /**
  * An incredibly simplistic Profiler for use with Unity editor code.
  */
+namespace Parabox.Debug {
+
 public class pb_Profiler
 {
 	static List<pb_Profiler> _activeProfilers = new List<pb_Profiler>();
@@ -20,12 +22,18 @@ public class pb_Profiler
 			activeProfilers.Add(this);
 	}
 
+	~pb_Profiler()
+	{
+		if(activeProfilers.Contains(this))
+			activeProfilers.Remove(this);
+	}
+
 	pb_Sample sample = new pb_Sample("Parent", null);						///< The current sample tree.
 
 	/**
 	 * Begin a profile sample.
 	 */
-	// [System.Diagnostics.Conditional("PROFILE_TIMES")]
+	// [System.Diagnostics.Conditional("PB_DEBUG")]
 	public void BeginSample(string methodName)
 	{
 		sample = sample.Add(methodName);
@@ -34,7 +42,7 @@ public class pb_Profiler
 	/**
 	 * Complete the sample.
 	 */
-	// [System.Diagnostics.Conditional("PROFILE_TIMES")]
+	// [System.Diagnostics.Conditional("PB_DEBUG")]
 	public void EndSample()
 	{
 		sample = sample.Stop();
@@ -43,7 +51,7 @@ public class pb_Profiler
 	/**
 	 * Clear all the internals and start with fresh slate.
 	 */
-	// [System.Diagnostics.Conditional("PROFILE_TIMES")]
+	// [System.Diagnostics.Conditional("PB_DEBUG")]
 	public void Reset()
 	{
 		sample = new pb_Sample("Parent", null);
@@ -79,4 +87,5 @@ public class pb_Profiler
 
 		return root;
 	}
+}
 }

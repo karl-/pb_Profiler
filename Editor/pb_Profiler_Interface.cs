@@ -2,17 +2,19 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using Parabox.Debug;
 
 public class pb_Profiler_Interface : EditorWindow
 {
 	Color odd_column_color = new Color(.86f, .86f, .86f, 1f);
 
 	List<pb_Profiler> profiles { get { return pb_Profiler.activeProfilers; } }
+	bool update_gui = true;
 
 	[MenuItem("Tools/pb_Profiler Window")]
 	public static void MenuInitProfilerWindow()
 	{
-		EditorWindow.GetWindow<pb_Profiler_Interface>(true, "pb_Profiler", true).Show();
+		EditorWindow.GetWindow<pb_Profiler_Interface>(true, "pb_Profiler", false).Show();
 	}
 
 	void OnEnable()
@@ -47,7 +49,11 @@ public class pb_Profiler_Interface : EditorWindow
 			display[i] = "Profiler: " + i;
 			values[i] = i;
 		}
-		view = EditorGUILayout.IntPopup("Profiler", view, display, values);
+
+		GUILayout.BeginHorizontal();
+			view = EditorGUILayout.IntPopup("Profiler", view, display, values);
+			update_gui = EditorGUILayout.Toggle("Update", update_gui, GUILayout.MaxWidth(165));
+		GUILayout.EndHorizontal();
 
 		// DRAW
 
@@ -55,8 +61,7 @@ public class pb_Profiler_Interface : EditorWindow
 			return;
 
 		pb_Sample root = profiles[view].GetRootSample();
-		if(root.children.Count != 1) return;
-		root = root.children[0];
+		if(root.children.Count < 1) return;
 
 		Color bg = GUI.backgroundColor;
 		GUILayout.BeginHorizontal(EditorStyles.toolbar);
@@ -75,10 +80,21 @@ public class pb_Profiler_Interface : EditorWindow
 		GUILayout.EndHorizontal();
 		scroll = EditorGUILayout.BeginScrollView(scroll);
 
-		DrawSampleTree(root);
+		for(int i = 0; i < root.children.Count; i++)	
+			DrawSampleTree(root.children[i]);
 
 		EditorGUILayout.EndScrollView();
+
+		GUILayout.BeginHorizontal();
+			if(GUILayout.Button("Print"))
+				Debug.Log(profiles[view].ToString());
+
+			if( GUILayout.Button("Clear", GUILayout.MaxWidth(120)) )
+				profiles[view].Reset();
+
+		GUILayout.EndHorizontal();
 	}
+
 
 	int name_width = 300;
 	int sample_width = 60;
@@ -91,15 +107,23 @@ public class pb_Profiler_Interface : EditorWindow
 	{
 		string ind = "";
 		for(int i = 0; i < indent; i++)	
-			ind += "\t";
+			ind += "*  ";
 
 		GUILayout.BeginHorizontal();
-			GUILayout.Label(ind + sample.name, GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
+			if(indent == 0)
+			{
+				GUILayout.Label(ind + sample.name, EditorStyles.boldLabel, GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
+				GUILayout.Space(2);
+			}
+			else
+			{
+				GUILayout.Label(ind + sample.name, GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
+			}
 
 			GUILayout.Label(sample.sampleCount.ToString(), GUILayout.MinWidth(sample_width), GUILayout.MaxWidth(sample_width));
 			GUILayout.Label(sample.Percentage().ToString("F4"), GUILayout.MinWidth(percent_width), GUILayout.MaxWidth(percent_width));
-			GUILayout.Label(sample.Average().ToString("F4"), GUILayout.MinWidth(avg_width), GUILayout.MaxWidth(avg_width));
-			GUILayout.Label(sample.Sum().ToString("F4"), GUILayout.MinWidth(sum_width), GUILayout.MaxWidth(sum_width));
+			GUILayout.Label(sample.average.ToString("F4"), GUILayout.MinWidth(avg_width), GUILayout.MaxWidth(avg_width));
+			GUILayout.Label(sample.sum.ToString("F4"), GUILayout.MinWidth(sum_width), GUILayout.MaxWidth(sum_width));
 		GUILayout.EndHorizontal();
 	
 		indent++;
