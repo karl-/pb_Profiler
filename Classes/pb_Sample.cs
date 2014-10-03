@@ -36,6 +36,7 @@ public class pb_Sample
 	public long sum { get; private set; }
 	public long average { get; private set; }
     public long max { get; private set; }
+    public long lastSample { get; private set; }
     public long min { get; private set; }
 
 	public pb_Sample(string name, pb_Sample parent)
@@ -116,14 +117,14 @@ public class pb_Sample
 
 		sampleCount++;
         
-        long elapsedMs = times[c].ElapsedMilliseconds;
+        lastSample = times[c].ElapsedMilliseconds;
 
-		sum += elapsedMs;
+        sum += lastSample;
 		average = sum / sampleCount;
-        if (elapsedMs < min || sampleCount < 2)
-            min = elapsedMs;
-        if (elapsedMs > max)
-            max = elapsedMs;
+        if (lastSample < min || sampleCount < 2)
+            min = lastSample;
+        if (lastSample > max)
+            max = lastSample;
 
 		return concurrentSamples < 0 ? (this.parent ?? this) : this;
 	}

@@ -2,13 +2,20 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Parabox.Debug;
 
 public class pb_Profiler_Interface : EditorWindow
 {
 	Color odd_column_color = new Color(.86f, .86f, .86f, 1f);
 
-	List<pb_Profiler> profiles { get { return pb_Profiler.activeProfilers; } }
+	List<pb_Profiler> profiles
+	{
+		get
+		{
+			return pb_Profiler.activeProfilers.FindAll(x => x.GetRootSample().children.Count > 0);
+		}
+	}
 	bool update_gui = true;
 
 	[MenuItem("Window/pb_Profiler")]
@@ -80,6 +87,8 @@ public class pb_Profiler_Interface : EditorWindow
 			GUILayout.Label("Min", EditorStyles.toolbarButton, GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
 			GUI.backgroundColor = bg;
 			GUILayout.Label("Max", EditorStyles.toolbarButton, GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
+			GUI.backgroundColor = odd_column_color;
+			GUILayout.Label("Current", EditorStyles.toolbarButton, GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
 
 			GUILayout.FlexibleSpace();
 		GUILayout.EndHorizontal();
@@ -125,6 +134,7 @@ public class pb_Profiler_Interface : EditorWindow
 
 			GUILayout.Label(sample.min.ToString() + " ms", GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
 			GUILayout.Label(sample.max.ToString() + " ms", GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
+			GUILayout.Label(sample.lastSample.ToString() + " ms", GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
 
 		GUILayout.EndHorizontal();
 	
