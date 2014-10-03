@@ -11,10 +11,10 @@ public class pb_Profiler_Interface : EditorWindow
 	List<pb_Profiler> profiles { get { return pb_Profiler.activeProfilers; } }
 	bool update_gui = true;
 
-	[MenuItem("Tools/pb_Profiler Window")]
+	[MenuItem("Window/pb_Profiler")]
 	public static void MenuInitProfilerWindow()
 	{
-		EditorWindow.GetWindow<pb_Profiler_Interface>(true, "pb_Profiler", false).Show();
+		EditorWindow.GetWindow<pb_Profiler_Interface>(false, "pb_Profiler", false).Show();
 	}
 
 	void OnEnable()
@@ -36,6 +36,7 @@ public class pb_Profiler_Interface : EditorWindow
 	// int n = 0;
 	int view = 0;
 	Vector2 scroll = Vector2.zero;
+
 	void OnGUI()
 	{
 		// odd_column_color = EditorGUILayout.ColorField("col", odd_column_color);
@@ -66,7 +67,7 @@ public class pb_Profiler_Interface : EditorWindow
 		Color bg = GUI.backgroundColor;
 		GUILayout.BeginHorizontal(EditorStyles.toolbar);
 			EditorGUILayout.Space();
-			GUILayout.Label("Sample", EditorStyles.toolbarButton, GUILayout.MinWidth(name_width-4), GUILayout.MaxWidth(name_width-4));
+			GUILayout.Label("Sample", EditorStyles.toolbarButton, GUILayout.MinWidth(name_width-6), GUILayout.MaxWidth(name_width-6));
 			GUI.backgroundColor = odd_column_color;
 			GUILayout.Label("Calls", EditorStyles.toolbarButton, GUILayout.MinWidth(sample_width), GUILayout.MaxWidth(sample_width));
 			GUI.backgroundColor = bg;
@@ -97,10 +98,10 @@ public class pb_Profiler_Interface : EditorWindow
 
 
 	int name_width = 300;
-	int sample_width = 60;
-	int percent_width = 60;
-	int sum_width = 60;
-	int avg_width = 60;
+	int sample_width = 64;
+	int percent_width = 64;
+	int sum_width = 80;
+	int avg_width = 80;
 
 	void DrawSampleTree(pb_Sample sample) { DrawSampleTree(sample, 0); }
 	void DrawSampleTree(pb_Sample sample, int indent)
@@ -110,20 +111,12 @@ public class pb_Profiler_Interface : EditorWindow
 			ind += "*  ";
 
 		GUILayout.BeginHorizontal();
-			if(indent == 0)
-			{
-				GUILayout.Label(ind + sample.name, EditorStyles.boldLabel, GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
-				GUILayout.Space(2);
-			}
-			else
-			{
-				GUILayout.Label(ind + sample.name, GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
-			}
+			GUILayout.Label(ind + sample.name, GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
 
 			GUILayout.Label(sample.sampleCount.ToString(), GUILayout.MinWidth(sample_width), GUILayout.MaxWidth(sample_width));
-			GUILayout.Label(sample.Percentage().ToString("F4"), GUILayout.MinWidth(percent_width), GUILayout.MaxWidth(percent_width));
-			GUILayout.Label(sample.average.ToString("F4"), GUILayout.MinWidth(avg_width), GUILayout.MaxWidth(avg_width));
-			GUILayout.Label(sample.sum.ToString("F4"), GUILayout.MinWidth(sum_width), GUILayout.MaxWidth(sum_width));
+			GUILayout.Label(sample.Percentage().ToString("F2"), GUILayout.MinWidth(percent_width), GUILayout.MaxWidth(percent_width));
+			GUILayout.Label(sample.average.ToString() + " ms", GUILayout.MinWidth(avg_width), GUILayout.MaxWidth(avg_width));
+			GUILayout.Label(sample.sum.ToString() + " ms", GUILayout.MinWidth(sum_width), GUILayout.MaxWidth(sum_width));
 		GUILayout.EndHorizontal();
 	
 		indent++;

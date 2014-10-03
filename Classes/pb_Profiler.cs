@@ -1,4 +1,3 @@
-using UnityEngine;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
@@ -22,6 +21,9 @@ public class pb_Profiler
 			activeProfilers.Add(this);
 	}
 
+	/**
+	 * Dee-structor.
+	 */
 	~pb_Profiler()
 	{
 		if(activeProfilers.Contains(this))
@@ -33,7 +35,6 @@ public class pb_Profiler
 	/**
 	 * Begin a profile sample.
 	 */
-	// [System.Diagnostics.Conditional("PB_DEBUG")]
 	public void BeginSample(string methodName)
 	{
 		sample = sample.Add(methodName);
@@ -42,7 +43,6 @@ public class pb_Profiler
 	/**
 	 * Complete the sample.
 	 */
-	// [System.Diagnostics.Conditional("PB_DEBUG")]
 	public void EndSample()
 	{
 		sample = sample.Stop();
@@ -51,7 +51,6 @@ public class pb_Profiler
 	/**
 	 * Clear all the internals and start with fresh slate.
 	 */
-	// [System.Diagnostics.Conditional("PB_DEBUG")]
 	public void Reset()
 	{
 		sample = new pb_Sample("Parent", null);
