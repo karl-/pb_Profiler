@@ -35,6 +35,8 @@ public class pb_Sample
 	public int sampleCount { get; private set; }
 	public long sum { get; private set; }
 	public long average { get; private set; }
+    public long max { get; private set; }
+    public long min { get; private set; }
 
 	public pb_Sample(string name, pb_Sample parent)
 	{
@@ -55,6 +57,8 @@ public class pb_Sample
 		sampleCount = 0;
 		sum = 0;
 		average = 0;
+        min = 0;
+        max = 0;
 	}
 
 	/**
@@ -111,9 +115,15 @@ public class pb_Sample
         times[c].Stop();
 
 		sampleCount++;
+        
+        long elapsedMs = times[c].ElapsedMilliseconds;
 
-		sum += times[c].ElapsedMilliseconds;
+		sum += elapsedMs;
 		average = sum / sampleCount;
+        if (elapsedMs < min || sampleCount < 2)
+            min = elapsedMs;
+        if (elapsedMs > max)
+            max = elapsedMs;
 
 		return concurrentSamples < 0 ? (this.parent ?? this) : this;
 	}
@@ -126,6 +136,8 @@ public class pb_Sample
 		sum = 0;
 		sampleCount = 0;
 		average = 0;
+        min = 0;
+        max = 0;
 
 		timeIndex = 0;
 		concurrentSamples = -1;
@@ -158,7 +170,8 @@ public class pb_Sample
 		sb.AppendLine(	tabs + this.name + ": " + sampleCount + "\n" +
 						tabs + "Average: " + average + "ms\n" + 
 						tabs + "Percentage: " + (first ? 100f : Percentage() ).ToString("F2") + "%\n" + 
-						tabs + "Sum: " + sum + "ms" );
+						tabs + "Sum: " + sum + "ms\n" +
+                        tabs + "Min/Max: [" + min + ", " + max + "]");
 
 		for(int i = 0; i < children.Count; i++)
 		{

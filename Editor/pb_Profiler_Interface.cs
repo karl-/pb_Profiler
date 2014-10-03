@@ -76,6 +76,10 @@ public class pb_Profiler_Interface : EditorWindow
 			GUILayout.Label("Avg", EditorStyles.toolbarButton, GUILayout.MinWidth(avg_width), GUILayout.MaxWidth(avg_width));
 			GUI.backgroundColor = bg;
 			GUILayout.Label("Sum", EditorStyles.toolbarButton, GUILayout.MinWidth(sum_width), GUILayout.MaxWidth(sum_width));
+			GUI.backgroundColor = odd_column_color;
+			GUILayout.Label("Min", EditorStyles.toolbarButton, GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
+			GUI.backgroundColor = bg;
+			GUILayout.Label("Max", EditorStyles.toolbarButton, GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
 
 			GUILayout.FlexibleSpace();
 		GUILayout.EndHorizontal();
@@ -102,6 +106,7 @@ public class pb_Profiler_Interface : EditorWindow
 	int percent_width = 64;
 	int sum_width = 80;
 	int avg_width = 80;
+	int range_width = 80;
 
 	void DrawSampleTree(pb_Sample sample) { DrawSampleTree(sample, 0); }
 	void DrawSampleTree(pb_Sample sample, int indent)
@@ -117,6 +122,10 @@ public class pb_Profiler_Interface : EditorWindow
 			GUILayout.Label(sample.Percentage().ToString("F2"), GUILayout.MinWidth(percent_width), GUILayout.MaxWidth(percent_width));
 			GUILayout.Label(sample.average.ToString() + " ms", GUILayout.MinWidth(avg_width), GUILayout.MaxWidth(avg_width));
 			GUILayout.Label(sample.sum.ToString() + " ms", GUILayout.MinWidth(sum_width), GUILayout.MaxWidth(sum_width));
+
+			GUILayout.Label(sample.min.ToString() + " ms", GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
+			GUILayout.Label(sample.max.ToString() + " ms", GUILayout.MinWidth(range_width), GUILayout.MaxWidth(range_width));
+
 		GUILayout.EndHorizontal();
 	
 		indent++;
