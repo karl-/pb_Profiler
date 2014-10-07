@@ -7,6 +7,8 @@ A simple profiler class for use in Unity3d, editor or runtime.
 
 pb_Profiler was originally developed as a debugging tool for [ProBuilder](http://www.protoolsforunity3d.com/probuilder/).
 
+![](interface.PNG?raw=true)
+
 Here's what a simple profile stack looks like:
 
 	RefreshUVCoordinates: 5

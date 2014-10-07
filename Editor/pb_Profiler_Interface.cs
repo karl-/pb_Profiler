@@ -16,7 +16,7 @@ public class pb_Profiler_Interface : EditorWindow
 			return pb_Profiler.activeProfilers.FindAll(x => x.GetRootSample().children.Count > 0);
 		}
 	}
-	bool update_gui = true;
+	// bool update_gui = true;
 
 	[MenuItem("Window/pb_Profiler")]
 	public static void MenuInitProfilerWindow()
@@ -35,7 +35,7 @@ public class pb_Profiler_Interface : EditorWindow
 	{
 		if(updateFreqCounter++ > UDPATE_FREQ * 100)
 		{
-			updateFreqCounter=0;
+			updateFreqCounter = 0;
 			Repaint();
 		}
 	}
@@ -43,6 +43,8 @@ public class pb_Profiler_Interface : EditorWindow
 	// int n = 0;
 	int view = 0;
 	Vector2 scroll = Vector2.zero;
+
+	Dictionary<string, bool> row_visibility = new Dictionary<string, bool>();
 
 	void OnGUI()
 	{
@@ -59,8 +61,13 @@ public class pb_Profiler_Interface : EditorWindow
 		}
 
 		GUILayout.BeginHorizontal();
-			view = EditorGUILayout.IntPopup("Profiler", view, display, values);
-			update_gui = EditorGUILayout.Toggle("Update", update_gui, GUILayout.MaxWidth(165));
+
+			EditorGUI.BeginChangeCheck();
+				view = EditorGUILayout.IntPopup("Profiler", view, display, values);
+			if(EditorGUI.EndChangeCheck())
+				row_visibility.Clear();
+
+			// update_gui = EditorGUILayout.Toggle("Update", update_gui, GUILayout.MaxWidth(165));
 		GUILayout.EndHorizontal();
 
 		// DRAW
@@ -117,15 +124,27 @@ public class pb_Profiler_Interface : EditorWindow
 	int avg_width = 80;
 	int range_width = 80;
 
-	void DrawSampleTree(pb_Sample sample) { DrawSampleTree(sample, 0); }
-	void DrawSampleTree(pb_Sample sample, int indent)
+	void DrawSampleTree(pb_Sample sample) { DrawSampleTree(sample, 0, ""); }
+	void DrawSampleTree(pb_Sample sample, int indent, string key_prefix)
 	{
-		string ind = "";
-		for(int i = 0; i < indent; i++)	
-			ind += "*  ";
+		string key = key_prefix + sample.name;
+		int childCount = sample.children.Count;
+
+		if(!row_visibility.ContainsKey(key))
+			row_visibility.Add(key, true);
 
 		GUILayout.BeginHorizontal();
-			GUILayout.Label(ind + sample.name, GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
+
+			GUILayout.BeginHorizontal(GUILayout.MinWidth(name_width), GUILayout.MaxWidth(name_width));
+
+				GUILayout.Space(indent * (childCount > 0 ? 10 : 22));
+				
+				if(childCount > 0)
+					row_visibility[key] = EditorGUILayout.Foldout(row_visibility[key], sample.name);
+				else
+					GUILayout.Label(sample.name);
+
+			GUILayout.EndHorizontal();
 
 			GUILayout.Label(sample.sampleCount.ToString(), GUILayout.MinWidth(sample_width), GUILayout.MaxWidth(sample_width));
 			GUILayout.Label(sample.Percentage().ToString("F2"), GUILayout.MinWidth(percent_width), GUILayout.MaxWidth(percent_width));
@@ -138,10 +157,13 @@ public class pb_Profiler_Interface : EditorWindow
 
 		GUILayout.EndHorizontal();
 	
-		indent++;
-		foreach(pb_Sample child in sample.children)
+		if(row_visibility[key])
 		{
-			DrawSampleTree(child, indent);
+			indent++;
+			foreach(pb_Sample child in sample.children)
+			{
+				DrawSampleTree(child, indent, key);
+			}
 		}
 	}
 }
