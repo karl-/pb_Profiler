@@ -3,24 +3,44 @@ using System.Collections.Generic;
 using System.Text;
 
 /**
- * An incredibly simplistic Profiler for use with Unity editor code.
+ * A simple Profiler for use with Unity editor code.  Resolution is in ticks, with methods to convert to nanosecond and millisecond.
  */
 namespace Parabox.Debug {
 
 public class pb_Profiler
 {
+	/// 1 billion nanoseconds per-second
+	const long NSEC_TO_SEC = 1000000000;
+
+	/// 1 million nanoseconds per-millisecond
+	const long MS_TO_NSEC = 1000000;
+
+	public static long TicksToNanosecond(long ticks)
+	{
+		return (NSEC_TO_SEC / Stopwatch.Frequency) * ticks;
+	}
+
+	public static long TicksToMillisecond(long ticks)
+	{
+		return ((NSEC_TO_SEC / Stopwatch.Frequency) * ticks) / MS_TO_NSEC;
+	}
+
 	static List<pb_Profiler> _activeProfilers = new List<pb_Profiler>();
 	public static List<pb_Profiler> activeProfilers { get { return _activeProfilers; } }
+
+	public string name { get; private set; }
 
 	/**
 	 * Constructor...
 	 */
-	public pb_Profiler()
+	public pb_Profiler(string name)
 	{
+		this.name = name;
+
 		if(!activeProfilers.Contains(this))
 			activeProfilers.Add(this);
 	}
-
+	
 	/**
 	 * Dee-structor.
 	 */

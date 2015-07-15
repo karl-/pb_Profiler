@@ -16,7 +16,8 @@ namespace Parabox.Debug {
 
 public class pb_Sample
 {
-	public string name;												///< The name provied by pb_Profiler.BeginSample(string name);
+	/// The name provied by pb_Profiler.BeginSample(string name);
+	public string name;
 
 	/**
 	 * How many concurrent instances of this sample may be active.
@@ -33,11 +34,16 @@ public class pb_Sample
 	public pb_Sample parent;
 	public List<pb_Sample> children = new List<pb_Sample>();
 	public int sampleCount { get; private set; }
+	/// Total ticks elapsed in this node
 	public long sum { get; private set; }
+	/// Average duration of ticks per-sample invocation
 	public long average { get; private set; }
-    public long max { get; private set; }
+	/// Max duration in ticks out of all samples
+	public long max { get; private set; }
+	/// Min duration in ticks out of all samples
+	public long min { get; private set; }
+	/// The last tallied sample elapsed ticks
     public long lastSample { get; private set; }
-    public long min { get; private set; }
 
 	public pb_Sample(string name, pb_Sample parent)
 	{
@@ -51,15 +57,15 @@ public class pb_Sample
 		timeIndex = 0;
 		concurrentSamples = 0;	// 0 because one sample is automatically started
 
-        this.times[timeIndex].Stop();
-        this.times[timeIndex].Reset();	// Stopwatch.Restart() is .NET 4 +
-        this.times[timeIndex].Start();
+		this.times[timeIndex].Stop();
+		this.times[timeIndex].Reset();	// Stopwatch.Restart() is .NET 4 +
+		this.times[timeIndex].Start();
 		
 		sampleCount = 0;
 		sum = 0;
 		average = 0;
-        min = 0;
-        max = 0;
+		min = 0;
+		max = 0;
 	}
 
 	/**
@@ -88,9 +94,9 @@ public class pb_Sample
 				if (t_timeIndex > MAX_STACKED_SAMPLES-1)
 					t_timeIndex = 0;
 
-                children[ind].times[t_timeIndex].Stop();
-                children[ind].times[t_timeIndex].Reset();
-                children[ind].times[t_timeIndex].Start();
+				children[ind].times[t_timeIndex].Stop();
+				children[ind].times[t_timeIndex].Reset();
+				children[ind].times[t_timeIndex].Start();
 
 				children[ind].timeIndex = t_timeIndex;
 				children[ind].concurrentSamples++;
@@ -116,15 +122,18 @@ public class pb_Sample
         times[c].Stop();
 
 		sampleCount++;
-        
-        lastSample = times[c].ElapsedMilliseconds;
 
-        sum += lastSample;
+		lastSample = times[c].ElapsedTicks;
+
+		sum += lastSample;
+		
 		average = sum / sampleCount;
-        if (lastSample < min || sampleCount < 2)
-            min = lastSample;
-        if (lastSample > max)
-            max = lastSample;
+
+		if (lastSample < min || sampleCount < 2)
+			min = lastSample;
+
+		if (lastSample > max)
+			max = lastSample;
 
 		return concurrentSamples < 0 ? (this.parent ?? this) : this;
 	}
@@ -169,10 +178,10 @@ public class pb_Sample
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.AppendLine(	tabs + this.name + ": " + sampleCount + "\n" +
-						tabs + "Average: " + average + "ms\n" + 
-						tabs + "Percentage: " + (first ? 100f : Percentage() ).ToString("F2") + "%\n" + 
-						tabs + "Sum: " + sum + "ms\n" +
-                        tabs + "Min/Max: [" + min + ", " + max + "]");
+						tabs + "Average: " + pb_Profiler.TicksToNanosecond(average) + "n\n" + 
+						tabs + "Percentage: " + (first ? 100f : Percentage() ).ToString("F2") + "%\n" +
+						tabs + "Sum: " + pb_Profiler.TicksToNanosecond(sum) + "n\n" +
+						tabs + "Min/Max: [" + pb_Profiler.TicksToNanosecond(min) + ", " + pb_Profiler.TicksToNanosecond(max) + "]n");
 
 		for(int i = 0; i < children.Count; i++)
 		{
@@ -183,7 +192,7 @@ public class pb_Sample
 		return sb.ToString();
 	}
 
-#region Math	///< Could just use Linq for this, but maybe performance would be an issue?
+#region Math
 
 	public float Percentage()
 	{
