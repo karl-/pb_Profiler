@@ -14,7 +14,37 @@ public class TestProfiler : Editor
 	const int ITERATIONS = 25;
 	const int MAX_SUM_DELTA = 20;	// If the profiler is off by more than x ms, something's wrong.
 
-	[MenuItem("Window/pb_Profiler Test")]
+	[MenuItem("Window/pb_Profiler Test Quick &d")]
+	static void Dot()
+	{
+
+		pb_Profiler profiler = new pb_Profiler("Test");
+
+		profiler.BeginSample("test a");
+
+		Thread.Sleep(100);
+
+		profiler.BeginSample("test b");
+		Thread.Sleep(200);
+
+		profiler.BeginSample("test c");
+		Thread.Sleep(100);
+		profiler.EndSample();
+		
+		profiler.BeginSample("test e");
+		Thread.Sleep(40);
+		profiler.EndSample();
+		
+		profiler.EndSample();
+		
+		profiler.BeginSample("test b");
+		Thread.Sleep(10);
+		profiler.EndSample();
+
+		profiler.EndSample();
+	}
+
+	// [MenuItem("Window/pb_Profiler Test")]
 	public static void Init()
 	{
 		Stopwatch stopwatch = new Stopwatch();
