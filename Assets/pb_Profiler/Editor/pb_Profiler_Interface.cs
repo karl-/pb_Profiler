@@ -117,7 +117,7 @@ public class pb_Profiler_Interface : EditorWindow
 				row_visibility.Clear();
 
 			resolution = (Resolution) EditorGUILayout.EnumPopup("Resolution", resolution);
-			
+
 		GUILayout.EndHorizontal();
 
 		// DRAW
@@ -144,7 +144,7 @@ public class pb_Profiler_Interface : EditorWindow
 	string TickToString(long tick)
 	{
 		switch(resolution)
-		{				
+		{
 			case Resolution.Nanosecond:
 				return string.Format("{0} n", pb_Profiler.TicksToNanosecond(tick));
 
@@ -224,7 +224,7 @@ public class pb_Profiler_Interface : EditorWindow
 		EditorGUI.BeginChangeCheck();
 
 		GUILayout.BeginHorizontal(chartStyle);
-		
+
 			int n = 0;
 
 			GUI.backgroundColor = column_colors[n++ % 2];
@@ -232,11 +232,12 @@ public class pb_Profiler_Interface : EditorWindow
 			GUILayout.BeginHorizontal(entryStyle);
 
 				GUILayout.Space(indent * (childCount > 0 ? 10 : 14));
-				
+
+				// don't use a Foldout control because it always eats the current event, which breaks clicking to follow stack trace
 				if(childCount > 0)
-					row_visibility[key] = EditorGUILayout.Foldout(row_visibility[key], sample.name);
-				else
-					GUILayout.Label(sample.name);
+					row_visibility[key] = EditorGUILayout.Toggle(row_visibility[key], EditorStyles.foldout, GUILayout.MaxWidth(14));
+
+				GUILayout.Label(sample.name);
 
 			GUILayout.EndHorizontal();
 
@@ -269,18 +270,12 @@ public class pb_Profiler_Interface : EditorWindow
 			GUI.backgroundColor = column_colors[n++ % 2];
 
 		GUILayout.EndHorizontal();
-		
+
 		Rect lastRect = GUILayoutUtility.GetLastRect();
 
 		bool changed = EditorGUI.EndChangeCheck();
 
-/*
-		if(currentEvent.type != EventType.Layout && currentEvent.type != EventType.Repaint && currentEvent.type != EventType.MouseMove)
-		{
-			UnityEngine.Debug.Log(changed + "\n" + currentEvent.type + lastRect.Contains(currentEvent.mousePosition).ToString());
-		}
-*/
-		if(	(currentEvent.type == EventType.MouseUp || (!changed && currentEvent.type == EventType.Used && sample.children.Count > 0)) &&
+		if(	(currentEvent.type == EventType.MouseDown && currentEvent.clickCount > 1) &&
 			lastRect.Contains(currentEvent.mousePosition) )
 		{
 			StackFrame frame = sample.stackTrace.GetFrame(0);
@@ -308,7 +303,7 @@ public class pb_Profiler_Interface : EditorWindow
 				wantsRepaint = true;
 			}
 		}
-	
+
 		if(row_visibility[key])
 		{
 			indent++;
