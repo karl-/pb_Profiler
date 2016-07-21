@@ -11,6 +11,14 @@ public class pb_Profiler_Interface : EditorWindow
 	/// Every other row in the times display will be drawn with this color
 	Color odd_column_color = new Color(.86f, .86f, .86f, 1f);
 
+	Color[] column_colors = new Color[]
+	{
+		new Color(.22f, .22f, .22f, 1f),
+		new Color(.25f, .25f, .25f, 1f)
+	};
+
+	Color highlight = new Color(90/255f, 190/255f, 255/255f, 1f);
+
 	/**
 	 * Determines how the gui displays stopwatch values.
 	 */
@@ -40,6 +48,7 @@ public class pb_Profiler_Interface : EditorWindow
 
 	void OnEnable()
 	{
+		this.wantsMouseMove = true;
 		resolution = (Resolution) EditorPrefs.GetInt("pb_Profiler.resolution", 2);
 		EditorApplication.update -= Update;
 		EditorApplication.update += Update;
@@ -58,13 +67,20 @@ public class pb_Profiler_Interface : EditorWindow
 
 	int view = 0;
 	Vector2 scroll = Vector2.zero;
+	pb_Sample hoveringSample = null;
+	Rect hoveringRect = new Rect(0,0,0,0);
+	bool wantsRepaint = false;
 	GUIStyle chartStyle = null;
 	GUIStyle entryStyle = null;
 
 	Dictionary<string, bool> row_visibility = new Dictionary<string, bool>();
 
+	static Event currentEvent;
+
 	void OnGUI()
 	{
+		currentEvent = Event.current;
+
 		if(chartStyle == null)
 		{
 			chartStyle = new GUIStyle(EditorStyles.toolbar);
@@ -154,24 +170,30 @@ public class pb_Profiler_Interface : EditorWindow
 
 		GUILayout.EndHorizontal();
 
+		hoveringSample = null;
+
 		scroll = EditorGUILayout.BeginScrollView(scroll);
+
+		Color original = GUI.backgroundColor;
 
 		foreach(pb_Sample child in root.children)
 			DrawSampleTree(child);
 
+		if(hoveringSample != null)
+		{
+			GUI.backgroundColor = highlight;
+			GUI.Box(hoveringRect, "", borderStyle);
+		}
+
+		GUI.backgroundColor = original;
+
 		EditorGUILayout.EndScrollView();
-	}
 
-	void DrawLabelRecursive(pb_Sample sample, System.Func<pb_Sample, string> selector)
-	{
-		GUILayout.Label( selector(sample) );
-
-		bool rowIsExpanded = false;
-		row_visibility.TryGetValue(sample.name, out rowIsExpanded);
-
-		if(sample.children.Count > 0 && rowIsExpanded)
-			foreach(pb_Sample child in sample.children)
-				DrawLabelRecursive(child, selector);
+		if(wantsRepaint)
+		{
+			wantsRepaint = false;
+			Repaint();
+		}
 	}
 
 	int FIELD_WIDTH = 90;
@@ -189,11 +211,17 @@ public class pb_Profiler_Interface : EditorWindow
 		if(!row_visibility.ContainsKey(key))
 			row_visibility.Add(key, true);
 
+		EditorGUI.BeginChangeCheck();
+
 		GUILayout.BeginHorizontal(chartStyle);
+		
+			int n = 0;
+
+			GUI.backgroundColor = column_colors[n++ % 2];
 
 			GUILayout.BeginHorizontal(entryStyle);
 
-				GUILayout.Space(indent * (childCount > 0 ? 10 : 22));
+				GUILayout.Space(indent * (childCount > 0 ? 10 : 14));
 				
 				if(childCount > 0)
 					row_visibility[key] = EditorGUILayout.Foldout(row_visibility[key], sample.name);
@@ -214,25 +242,36 @@ public class pb_Profiler_Interface : EditorWindow
 
 			DrawSolidColor(r, color);
 
-			Color original = GUI.backgroundColor;
+			GUI.backgroundColor = column_colors[n++ % 2];
 			GUILayout.Label(sample.sampleCount.ToString(), 			entryStyle, GUILayout.MinWidth(FIELD_WIDTH), GUILayout.MaxWidth(FIELD_WIDTH));
-			GUI.backgroundColor = odd_column_color;
+			GUI.backgroundColor = column_colors[n++ % 2];
 			GUILayout.Label(sample.Percentage().ToString("F2"), 	entryStyle, GUILayout.MinWidth(FIELD_WIDTH), GUILayout.MaxWidth(FIELD_WIDTH));
-			GUI.backgroundColor = original;
+			GUI.backgroundColor = column_colors[n++ % 2];
 			GUILayout.Label(TickToString(sample.average),			entryStyle, GUILayout.MinWidth(FIELD_WIDTH), GUILayout.MaxWidth(FIELD_WIDTH));
-			GUI.backgroundColor = odd_column_color;
+			GUI.backgroundColor = column_colors[n++ % 2];
 			GUILayout.Label(TickToString(sample.sum), 				entryStyle, GUILayout.MinWidth(FIELD_WIDTH), GUILayout.MaxWidth(FIELD_WIDTH));
-			GUI.backgroundColor = original;
+			GUI.backgroundColor = column_colors[n++ % 2];
 			GUILayout.Label(TickToString(sample.min),				entryStyle, GUILayout.MinWidth(FIELD_WIDTH), GUILayout.MaxWidth(FIELD_WIDTH));
-			GUI.backgroundColor = odd_column_color;
+			GUI.backgroundColor = column_colors[n++ % 2];
 			GUILayout.Label(TickToString(sample.max),				entryStyle, GUILayout.MinWidth(FIELD_WIDTH), GUILayout.MaxWidth(FIELD_WIDTH));
-			GUI.backgroundColor = original;
+			GUI.backgroundColor = column_colors[n++ % 2];
 			GUILayout.Label(TickToString(sample.lastSample), 		entryStyle, GUILayout.MinWidth(FIELD_WIDTH), GUILayout.MaxWidth(FIELD_WIDTH));
-			GUI.backgroundColor = original;
+			GUI.backgroundColor = column_colors[n++ % 2];
 
 		GUILayout.EndHorizontal();
+		
+		Rect lastRect = GUILayoutUtility.GetLastRect();
 
-		if( Event.current.type == EventType.MouseUp && GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition) )
+		bool changed = EditorGUI.EndChangeCheck();
+
+/*
+		if(currentEvent.type != EventType.Layout && currentEvent.type != EventType.Repaint && currentEvent.type != EventType.MouseMove)
+		{
+			UnityEngine.Debug.Log(changed + "\n" + currentEvent.type + lastRect.Contains(currentEvent.mousePosition).ToString());
+		}
+*/
+		if(	(currentEvent.type == EventType.MouseUp || (!changed && currentEvent.type == EventType.Used && sample.children.Count > 0)) &&
+			lastRect.Contains(currentEvent.mousePosition) )
 		{
 			StackFrame frame = sample.stackTrace.GetFrame(0);
 
@@ -243,6 +282,20 @@ public class pb_Profiler_Interface : EditorWindow
 				UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath(filePathRel, typeof(TextAsset));
 				int lineNumber = frame.GetFileLineNumber();
 				AssetDatabase.OpenAsset(obj, lineNumber);
+			}
+		}
+
+		if( lastRect.Contains(currentEvent.mousePosition) )
+		{
+			if(hoveringSample != sample)
+			{
+				hoveringSample = sample;
+				hoveringRect = new Rect(
+					lastRect.x + 6,
+					lastRect.y,
+					lastRect.width - 12,
+					lastRect.height + 2);
+				wantsRepaint = true;
 			}
 		}
 	
@@ -272,6 +325,21 @@ public class pb_Profiler_Interface : EditorWindow
 		relPath = filePath.Substring(ind, pathLen-ind);
 
 		return true;
+	}
+
+	private static GUIStyle _borderStyle;
+	private static GUIStyle borderStyle
+	{
+		get
+		{
+			if(_borderStyle == null)
+			{
+				_borderStyle = new GUIStyle();
+				_borderStyle.normal.background = Resources.Load<Texture2D>("Border");
+				_borderStyle.border = new RectOffset(1,1,1,1);
+			}
+			return _borderStyle;
+		}
 	}
 
 	private static GUIStyle _splitStyle;
