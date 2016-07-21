@@ -52,6 +52,13 @@ public class pb_Profiler_Interface : EditorWindow
 		resolution = (Resolution) EditorPrefs.GetInt("pb_Profiler.resolution", 2);
 		EditorApplication.update -= Update;
 		EditorApplication.update += Update;
+
+		if(!EditorGUIUtility.isProSkin)
+		{
+			highlight = new Color(.3f, .3f, .3f, 1f);
+			column_colors[0] = new Color(0.7607f, 0.7607f, 0.7607f, 1f);
+			column_colors[1] = new Color(0.73f, 0.73f, 0.73f, 1f);
+		}
 	}
 
 	const int UDPATE_FREQ = 1;	// 1 per frame
@@ -89,6 +96,9 @@ public class pb_Profiler_Interface : EditorWindow
 			entryStyle.normal.background = EditorGUIUtility.whiteTexture;
 			chartStyle.onNormal.background = null;
 			entryStyle.onNormal.background = EditorGUIUtility.whiteTexture;
+
+			if(!EditorGUIUtility.isProSkin)
+				entryStyle.normal.textColor = Color.black;
 		}
 
 		string[] display = new string[profiles.Count];
