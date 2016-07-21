@@ -15,30 +15,34 @@ public class TestProfiler : Editor
 	const int MAX_SUM_DELTA = 20;	// If the profiler is off by more than x ms, something's wrong.
 
 	[MenuItem("Window/pb_Profiler Test Quick &d")]
-	static void Dot()
+	static void MenuTestProfiler()
 	{
-
 		pb_Profiler profiler = new pb_Profiler("Test");
 
 		profiler.BeginSample("test a");
 
-		Thread.Sleep(100);
-
-		profiler.BeginSample("test b");
-		Thread.Sleep(200);
-
-		profiler.BeginSample("test c");
+		profiler.BeginSample("sleep 100ms");
 		Thread.Sleep(100);
 		profiler.EndSample();
-		
-		profiler.BeginSample("test e");
+
+		profiler.BeginSample("test b");
+
+		profiler.BeginSample("sleep 20ms");
+		Thread.Sleep(20);
+		profiler.EndSample();
+
+		profiler.BeginSample("sleep 10ms");
+		Thread.Sleep(10);
+		profiler.EndSample();
+
+		profiler.BeginSample("sleep 40ms");
 		Thread.Sleep(40);
 		profiler.EndSample();
-		
-		profiler.EndSample();
-		
-		profiler.BeginSample("test b");
+
+		profiler.BeginSample("sleep 10ms");
 		Thread.Sleep(10);
+		profiler.EndSample();
+
 		profiler.EndSample();
 
 		profiler.EndSample();

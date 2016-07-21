@@ -54,33 +54,38 @@ Here's what a simple profile stack looks like:
 
 ### Instructions
 
-Wrap code you wish to profile in `BeginSample("Name")` and `EndSample()` calls.  Call `ToString()` to view a tree formatted stack with timing information.  Ex:
+Wrap code you want to profile in `BeginSample("Name")` and `EndSample()` calls.  Call `ToString()` to view a tree formatted stack with timing information.  All active profiler instances will also be automatically viewable in the `Window / pb_Profiler Window`.  Ex:
 
-	public void SomeMethod()
+	[MenuItem("Window/pb_Profiler Test Quick &d")]
+	static void MenuTestProfiler()
 	{
-		pb_Profiler profiler = new pb_Profiler();
-	
-		profiler.BeginSample("SomeMethod");
-		
-		profiler.BeginSample("Allocate Vector3");
-	
-			Vector3 v0 = new Vector3(	rand[i+0],
-										rand[i+1],
-										rand[i+2] );
-			Vector3 v1 = new Vector3( 	rand[i+1],
-										rand[i+2],
-										rand[i+0] );
+		pb_Profiler profiler = new pb_Profiler("Test");
+
+		profiler.BeginSample("test a");
+
+		profiler.BeginSample("sleep 100ms");
+		Thread.Sleep(100);
 		profiler.EndSample();
-	
-		// Run three times for profiling's sake.
-		for(int i = 0; i < 3; i++)
-		{
-			profiler.BeginSample("Cross Product");
-			Vector3 temp = Vector3.Cross(v0, v1);
-			profiler.EndSample();
-		}
-	
+
+		profiler.BeginSample("test b");
+
+		profiler.BeginSample("sleep 20ms");
+		Thread.Sleep(20);
 		profiler.EndSample();
-	
-		Debug.Log(profiler.ToString());
+
+		profiler.BeginSample("sleep 10ms");
+		Thread.Sleep(10);
+		profiler.EndSample();
+
+		profiler.BeginSample("sleep 40ms");
+		Thread.Sleep(40);
+		profiler.EndSample();
+
+		profiler.BeginSample("sleep 10ms");
+		Thread.Sleep(10);
+		profiler.EndSample();
+
+		profiler.EndSample();
+
+		profiler.EndSample();
 	}
