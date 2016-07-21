@@ -221,8 +221,6 @@ public class pb_Profiler_Interface : EditorWindow
 		if(!row_visibility.ContainsKey(key))
 			row_visibility.Add(key, true);
 
-		EditorGUI.BeginChangeCheck();
-
 		GUILayout.BeginHorizontal(chartStyle);
 
 			int n = 0;
@@ -272,8 +270,6 @@ public class pb_Profiler_Interface : EditorWindow
 		GUILayout.EndHorizontal();
 
 		Rect lastRect = GUILayoutUtility.GetLastRect();
-
-		bool changed = EditorGUI.EndChangeCheck();
 
 		if(	(currentEvent.type == EventType.MouseDown && currentEvent.clickCount > 1) &&
 			lastRect.Contains(currentEvent.mousePosition) )

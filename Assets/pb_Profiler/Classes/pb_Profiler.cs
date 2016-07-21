@@ -40,7 +40,7 @@ public class pb_Profiler
 		if(!activeProfilers.Contains(this))
 			activeProfilers.Add(this);
 	}
-	
+
 	/**
 	 * Dee-structor.
 	 */
@@ -55,9 +55,9 @@ public class pb_Profiler
 	/**
 	 * Begin a profile sample.
 	 */
-	public void BeginSample(string methodName)
+	public void BeginSample(string methodName, int stackOffset = 0)
 	{
-		sample = sample.Add(methodName);
+		sample = sample.Add(methodName, stackOffset);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class pb_Profiler
 
 	/**
 	 * Presents a pretty tiered string.
-	 * @todo Write a nice editor interface instead o' just relying on 
+	 * @todo Write a nice editor interface instead o' just relying on
 	 * the ToString representation.
 	 */
 	public override string ToString()
@@ -90,7 +90,7 @@ public class pb_Profiler
 			sb.AppendLine(root.children[i].ToStringRecursive());
 
 		return sb.ToString();
-	}	
+	}
 
 	/**
 	 * Returns the parent sample of this profiler tree.

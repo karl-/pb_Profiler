@@ -12,7 +12,7 @@ using System.Diagnostics;
  * you'd want to use the bindings in pb_Profiler instead of calling
  * anything in here directly.
  */
-namespace Parabox.Debug 
+namespace Parabox.Debug
 {
 	public class pb_Sample
 	{
@@ -23,7 +23,7 @@ namespace Parabox.Debug
 
 		/**
 		 * How many concurrent instances of this sample may be active.
-		 * Really only useful if threading, and I doubt any of this is 
+		 * Really only useful if threading, and I doubt any of this is
 		 * thread-safe to begin with.
 		 * @todo Consider removing this?
 		 */
@@ -66,7 +66,7 @@ namespace Parabox.Debug
 			this.times[timeIndex].Stop();
 			this.times[timeIndex].Reset();	// Stopwatch.Restart() is .NET 4 +
 			this.times[timeIndex].Start();
-			
+
 			sampleCount = 0;
 			sum = 0;
 			average = 0;
@@ -86,7 +86,7 @@ namespace Parabox.Debug
 		 * Add a sample as a child of this sample.  Automatically searches for an existing sample of the same type in
 		 * children so that duplicates are now added.
 		 */
-		public pb_Sample Add(string name)
+		public pb_Sample Add(string name, int stackOffset = 0)
 		{
 			if(children.Count > 0)
 			{
@@ -111,7 +111,7 @@ namespace Parabox.Debug
 				}
 			}
 
-			children.Add( new pb_Sample(name, this, 3) );
+			children.Add( new pb_Sample(name, this, 3 + stackOffset) );
 
 			return children[children.Count-1];
 		}
@@ -132,7 +132,7 @@ namespace Parabox.Debug
 			lastSample = times[c].ElapsedTicks;
 
 			sum += lastSample;
-			
+
 			average = sum / sampleCount;
 
 			if (lastSample < min || sampleCount < 2)
@@ -148,7 +148,7 @@ namespace Parabox.Debug
 		 * Zero out all values and samples associated with this sample, and it's children.
 		 */
 		public void Clear()
-		{	
+		{
 			sum = 0;
 			sampleCount = 0;
 			average = 0;
@@ -184,7 +184,7 @@ namespace Parabox.Debug
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.AppendLine(	tabs + this.name + ": " + sampleCount + "\n" +
-							tabs + "Average: " + pb_Profiler.TicksToNanosecond(average) + "n\n" + 
+							tabs + "Average: " + pb_Profiler.TicksToNanosecond(average) + "n\n" +
 							tabs + "Percentage: " + (first ? 100f : Percentage() ).ToString("F2") + "%\n" +
 							tabs + "Sum: " + pb_Profiler.TicksToNanosecond(sum) + "n\n" +
 							tabs + "Min/Max: [" + pb_Profiler.TicksToNanosecond(min) + ", " + pb_Profiler.TicksToNanosecond(max) + "]n");
