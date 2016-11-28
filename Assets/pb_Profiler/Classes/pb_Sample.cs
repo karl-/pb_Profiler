@@ -14,6 +14,9 @@ using System.Diagnostics;
  */
 namespace Parabox.Debug
 {
+	/**
+	 *	A single time sample.
+	 */
 	public class pb_Sample
 	{
 		/// The name provied by pb_Profiler.BeginSample(string name);

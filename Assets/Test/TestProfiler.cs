@@ -1,4 +1,6 @@
-﻿using UE = UnityEngine;
+﻿#if DEBUG
+
+using UE = UnityEngine;
 using System.Collections;
 using System.Diagnostics;
 using System.Threading;
@@ -14,11 +16,11 @@ public class TestProfiler : Editor
 	const int ITERATIONS = 25;
 	const int MAX_SUM_DELTA = 20;	// If the profiler is off by more than x ms, something's wrong.
 
+	static pb_Profiler profiler = new pb_Profiler("Test");
+
 	[MenuItem("Window/pb_Profiler Test Quick &d")]
 	static void MenuTestProfiler()
 	{
-		pb_Profiler profiler = new pb_Profiler("Test");
-
 		profiler.BeginSample("test a");
 
 		profiler.BeginSample("sleep 100ms");
@@ -83,3 +85,4 @@ public class TestProfiler : Editor
 	}
 
 }
+#endif
