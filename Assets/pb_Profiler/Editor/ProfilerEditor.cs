@@ -59,18 +59,24 @@ namespace Parabox.Debug
 		}
 
 		int view = 0;
+		private pb_Profiler profiler = null;
 
 		void OnGUI()
 		{
-			pb_Profiler profiler = profiles != null && profiles.Count > 0 ? profiles[view] : null;
+			int availableProfilerCount = profiles.Count;
+			string[] display = new string[availableProfilerCount];
+			int[] values = new int[availableProfilerCount];
 
-			string[] display = new string[profiles.Count];
-			int[] values = new int[display.Length];
-
-			for(int i = 0; i < values.Length; i++)
+			for(int i = 0; i < availableProfilerCount; i++)
 			{
 				display[i] = profiles[i].name;
 				values[i] = i;
+			}
+
+			if(profiler == null && availableProfilerCount > 0)
+			{
+				profiler = profiles[0];
+				sampleView.SetProfiler(profiler);
 			}
 
 			GUILayout.BeginHorizontal();
@@ -79,7 +85,7 @@ namespace Parabox.Debug
 					view = EditorGUILayout.IntPopup("Profiler", view, display, values);
 				if(EditorGUI.EndChangeCheck())
 				{
-					profiler = profiles != null && profiles.Count > 0 ? profiles[view] : null;
+					profiler = view > -1 && view < availableProfilerCount ? profiles[view] : null;
 					sampleView.SetProfiler(profiler);
 				}
 
@@ -87,7 +93,16 @@ namespace Parabox.Debug
 
 			GUILayout.EndHorizontal();
 
-			sampleView.Draw();
+
+			if(profiler == null)
+			{
+				GUILayout.FlexibleSpace();
+				GUILayout.Label("No Profiler Loaded", EditorStyles.centeredGreyMiniLabel);
+			}
+			else
+			{
+				sampleView.Draw();
+			}
 
 			GUILayout.FlexibleSpace();
 

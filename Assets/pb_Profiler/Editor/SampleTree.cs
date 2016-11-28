@@ -49,18 +49,6 @@ namespace Parabox.Debug
 		public override void Draw()
 		{
 			currentEvent = Event.current;
-
-			if(profiler == null)
-			{
-				// GUILayout.FlexibleSpace();
-				// GUILayout.BeginHorizontal();
-				GUILayout.FlexibleSpace();
-				GUILayout.Label("No Profiler Loaded", EditorStyles.centeredGreyMiniLabel);
-				// GUILayout.FlexibleSpace();
-				// GUILayout.EndHorizontal();
-				return;
-			}
-
 			pb_Sample root = profiler.GetRootSample();
 
 			if(root.children.Count < 1)

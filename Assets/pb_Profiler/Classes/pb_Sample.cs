@@ -19,7 +19,7 @@ namespace Parabox.Debug
 	 */
 	public class pb_Sample
 	{
-		/// The name provied by pb_Profiler.BeginSample(string name);
+		// The name provied by pb_Profiler.BeginSample(string name);
 		public string name;
 
 		public StackTrace stackTrace;
@@ -39,15 +39,15 @@ namespace Parabox.Debug
 		public pb_Sample parent;
 		public List<pb_Sample> children = new List<pb_Sample>();
 		public int sampleCount { get; private set; }
-		/// Total ticks elapsed in this node
+		// Total ticks elapsed in this node
 		public long sum { get; private set; }
-		/// Average duration of ticks per-sample invocation
+		// Average duration of ticks per-sample invocation
 		public long average { get; private set; }
-		/// Max duration in ticks out of all samples
+		// Max duration in ticks out of all samples
 		public long max { get; private set; }
-		/// Min duration in ticks out of all samples
+		// Min duration in ticks out of all samples
 		public long min { get; private set; }
-		/// The last tallied sample elapsed ticks
+		// The last tallied sample elapsed ticks
 	    public long lastSample { get; private set; }
 
 		public pb_Sample(string name, pb_Sample parent, int stackOffset = 2)
