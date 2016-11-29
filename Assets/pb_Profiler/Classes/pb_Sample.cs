@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
@@ -26,11 +28,12 @@ namespace Parabox.Debug
 
 		/**
 		 * How many concurrent instances of this sample may be active.
-		 * Really only useful if threading, and I doubt any of this is
-		 * thread-safe to begin with.
-		 * @todo Consider removing this?
 		 */
 		const int MAX_STACKED_SAMPLES = 1;
+
+		public static int sampleHistorySize = 64;
+		private Queue<long> _sampleHistory = new Queue<long>();
+		public List<long> sampleHistory { get { return new List<long>( _sampleHistory ); } }
 
 		internal int timeIndex = 0;
 		internal int concurrentSamples = -1;
@@ -133,6 +136,11 @@ namespace Parabox.Debug
 			sampleCount++;
 
 			lastSample = times[c].ElapsedTicks;
+
+			if(_sampleHistory.Count > sampleHistorySize)
+				_sampleHistory.Dequeue();
+
+			_sampleHistory.Enqueue(lastSample);
 
 			sum += lastSample;
 

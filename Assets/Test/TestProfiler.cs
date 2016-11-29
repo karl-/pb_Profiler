@@ -21,7 +21,12 @@ public class TestProfiler : Editor
 	[MenuItem("Window/pb_Profiler Test Quick &d")]
 	static void MenuTestProfiler()
 	{
+		profiler.BeginSample("random");
+			Thread.Sleep( (int) UnityEngine.Random.Range(20f, 200f) );
+		profiler.EndSample();
+
 		profiler.BeginSample("test a");
+
 
 		profiler.BeginSample("sleep 100ms");
 		Thread.Sleep(100);

@@ -43,7 +43,7 @@ namespace Parabox.Debug
 			EditorApplication.update -= Update;
 			EditorApplication.update += Update;
 
-			sampleView = new SampleTree();
+			sampleView = new SampleGraph();
 		}
 
 		const int UDPATE_FREQ = 1;	// 1 per frame
@@ -79,17 +79,19 @@ namespace Parabox.Debug
 				sampleView.SetProfiler(profiler);
 			}
 
-			GUILayout.BeginHorizontal();
+			GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
 				EditorGUI.BeginChangeCheck();
-					view = EditorGUILayout.IntPopup("Profiler", view, display, values);
+					view = EditorGUILayout.IntPopup("", view, display, values, EditorStyles.toolbarDropDown);
 				if(EditorGUI.EndChangeCheck())
 				{
 					profiler = view > -1 && view < availableProfilerCount ? profiles[view] : null;
 					sampleView.SetProfiler(profiler);
 				}
 
-				resolution = (Resolution) EditorGUILayout.EnumPopup("Resolution", resolution);
+				GUILayout.FlexibleSpace();
+
+				resolution = (Resolution) EditorGUILayout.EnumPopup("", resolution, EditorStyles.toolbarDropDown);
 
 			GUILayout.EndHorizontal();
 
