@@ -9,7 +9,9 @@ namespace Parabox.Debug
 		private static GUIStyle _borderStyle,
 								_splitStyle,
 								_chartStyle,
-								_entryStyle;
+								_entryStyle,
+								_chartAxisLabel,
+								_chartBackgroundStyle;
 
 
 		public static GUIStyle borderStyle
@@ -68,6 +70,33 @@ namespace Parabox.Debug
 						entryStyle.normal.textColor = Color.black;
 				}
 				return _entryStyle;
+			}
+		}
+
+		public static GUIStyle chartAxisLabel
+		{
+			get
+			{
+				if(_chartAxisLabel == null)
+				{
+					_chartAxisLabel = new GUIStyle(EditorStyles.whiteMiniLabel);
+					_chartAxisLabel.alignment = TextAnchor.LowerLeft;
+				}
+				return _chartAxisLabel;
+			}
+		}
+
+		public static GUIStyle chartBackgroundStyle
+		{
+			get
+			{
+				if(_chartBackgroundStyle == null)
+				{
+					_chartBackgroundStyle = new GUIStyle();
+					_chartBackgroundStyle.border = new RectOffset(1,1,1,1);
+					_chartBackgroundStyle.normal.background = Resources.Load<Texture2D>("Border");
+				}
+				return _chartBackgroundStyle;
 			}
 		}
 	}

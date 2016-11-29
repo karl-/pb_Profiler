@@ -43,7 +43,7 @@ namespace Parabox.Debug
 			EditorApplication.update -= Update;
 			EditorApplication.update += Update;
 
-			sampleView = new SampleGraph();
+			sampleView = new SampleTree();
 		}
 
 		const int UDPATE_FREQ = 1;	// 1 per frame

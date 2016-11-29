@@ -28,6 +28,7 @@ namespace Parabox.Debug
 		const float COLOR_BLOCK_SIZE = 16f;
 		const int COLOR_BLOCK_PAD = 6;
 
+		private pb_Sample selectedSample = null;
 		private Event currentEvent;
 
 		public SampleTree()
@@ -51,13 +52,16 @@ namespace Parabox.Debug
 			currentEvent = Event.current;
 			pb_Sample root = profiler.GetRootSample();
 
+			if(selectedSample != null)
+				SampleGraph.Draw(selectedSample);
+
 			if(root.children.Count < 1)
 				return;
 
-			DrawChart(root);
+			DrawTreeView(root);
 		}
 
-		void DrawChart(pb_Sample root)
+		void DrawTreeView(pb_Sample root)
 		{
 			Color bg = GUI.backgroundColor;
 
@@ -98,6 +102,9 @@ namespace Parabox.Debug
 
 			GUI.backgroundColor = original;
 
+			// add a little padding so that the last sample row isn't clipped by the scroll view
+			GUILayout.Space(4);
+
 			EditorGUILayout.EndScrollView();
 		}
 
@@ -109,6 +116,8 @@ namespace Parabox.Debug
 
 			if(!row_visibility.ContainsKey(key))
 				row_visibility.Add(key, true);
+
+			Color oldColor = GUI.backgroundColor;
 
 			GUILayout.BeginHorizontal(ProfilerStyles.chartStyle);
 
@@ -122,7 +131,11 @@ namespace Parabox.Debug
 
 					// don't use a Foldout control because it always eats the current event, which breaks clicking to follow stack trace
 					if(childCount > 0)
+					{
+						GUI.backgroundColor = oldColor;
+						GUI.color = Color.white;
 						row_visibility[key] = EditorGUILayout.Toggle(row_visibility[key], EditorStyles.foldout, GUILayout.MaxWidth(14));
+					}
 
 					GUILayout.Label(sample.name);
 
@@ -160,18 +173,27 @@ namespace Parabox.Debug
 
 			Rect lastRect = GUILayoutUtility.GetLastRect();
 
-			if(	(currentEvent.type == EventType.MouseDown && currentEvent.clickCount > 1) &&
-				lastRect.Contains(currentEvent.mousePosition) )
+			if(	currentEvent.type == EventType.MouseDown && lastRect.Contains(currentEvent.mousePosition) )
 			{
-				StackFrame frame = sample.stackTrace.GetFrame(0);
-
-				string filePathRel;
-
-				if( RelativeFilePath(frame.GetFileName(), out filePathRel) )
+				if(currentEvent.clickCount > 1)
 				{
-					UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath(filePathRel, typeof(TextAsset));
-					int lineNumber = frame.GetFileLineNumber();
-					AssetDatabase.OpenAsset(obj, lineNumber);
+					StackFrame frame = sample.stackTrace.GetFrame(0);
+
+					string filePathRel;
+
+					if( RelativeFilePath(frame.GetFileName(), out filePathRel) )
+					{
+						UnityEngine.Object obj = AssetDatabase.LoadAssetAtPath(filePathRel, typeof(TextAsset));
+						int lineNumber = frame.GetFileLineNumber();
+						AssetDatabase.OpenAsset(obj, lineNumber);
+					}
+				}
+				else
+				{
+					if(selectedSample == sample)
+						selectedSample = null;
+					else
+						selectedSample = sample;
 				}
 			}
 
