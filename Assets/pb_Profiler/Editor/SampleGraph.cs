@@ -35,7 +35,7 @@ namespace Parabox.Debug
 			{
 				if(sample == null)
 				{
-					GUI.Label(rect, "Sample History Graph", EditorStyles.centeredGreyMiniLabel);
+					GUI.Label(rect, "Sample History Graph", ProfilerStyles.centeredGrayLabel);
 					return;
 				}
 
@@ -57,7 +57,7 @@ namespace Parabox.Debug
 
 				if(count < 3)
 				{
-					GUI.Label(rect, "Too Few Samples to Graph", EditorStyles.centeredGreyMiniLabel);
+					GUI.Label(rect, "Too Few Samples to Graph", ProfilerStyles.centeredGrayLabel);
 					return;
 				}
 

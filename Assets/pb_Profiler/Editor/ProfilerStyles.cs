@@ -11,7 +11,8 @@ namespace Parabox.Debug
 								_chartStyle,
 								_entryStyle,
 								_chartAxisLabel,
-								_chartBackgroundStyle;
+								_chartBackgroundStyle,
+								_centeredGrayLabel;
 
 
 		public static GUIStyle borderStyle
@@ -97,6 +98,20 @@ namespace Parabox.Debug
 					_chartBackgroundStyle.normal.background = Resources.Load<Texture2D>("Border");
 				}
 				return _chartBackgroundStyle;
+			}
+		}
+
+		public static GUIStyle centeredGrayLabel
+		{
+			get
+			{
+				if(_centeredGrayLabel == null)
+				{
+					_centeredGrayLabel = new GUIStyle(EditorStyles.label);
+					_centeredGrayLabel.normal.textColor = Color.gray;
+					_centeredGrayLabel.alignment = TextAnchor.MiddleCenter;
+				}
+				return _centeredGrayLabel;
 			}
 		}
 	}

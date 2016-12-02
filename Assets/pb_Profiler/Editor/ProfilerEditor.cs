@@ -99,7 +99,7 @@ namespace Parabox.Debug
 			if(profiler == null)
 			{
 				GUILayout.FlexibleSpace();
-				GUILayout.Label("No Profiler Loaded", EditorStyles.centeredGreyMiniLabel);
+				GUILayout.Label("No Profiler Loaded", ProfilerStyles.centeredGrayLabel);
 			}
 			else
 			{
