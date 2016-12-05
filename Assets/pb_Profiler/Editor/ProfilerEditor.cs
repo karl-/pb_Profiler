@@ -93,29 +93,15 @@ namespace Parabox.Debug
 
 				resolution = (Resolution) EditorGUILayout.EnumPopup("", resolution, EditorStyles.toolbarDropDown);
 
-			GUILayout.EndHorizontal();
+				// if(GUILayout.Button("Print"))
+				// 	UnityEngine.Debug.Log(profiler.ToString());
 
-
-			if(profiler == null)
-			{
-				GUILayout.FlexibleSpace();
-				GUILayout.Label("No Profiler Loaded", ProfilerStyles.centeredGrayLabel);
-			}
-			else
-			{
-				sampleView.Draw();
-			}
-
-			GUILayout.FlexibleSpace();
-
-			GUILayout.BeginHorizontal();
-				if(GUILayout.Button("Print"))
-					UnityEngine.Debug.Log(profiler.ToString());
-
-				if( GUILayout.Button("Clear", GUILayout.MaxWidth(120)) )
+				if( GUILayout.Button("Clear", EditorStyles.toolbarButton) && profiler != null)
 					profiler.Reset();
+
 			GUILayout.EndHorizontal();
 
+			sampleView.Draw();
 
 			if(sampleView.wantsRepaint)
 			{

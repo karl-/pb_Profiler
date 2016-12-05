@@ -50,12 +50,10 @@ namespace Parabox.Debug
 		public override void Draw()
 		{
 			currentEvent = Event.current;
-			pb_Sample root = profiler.GetRootSample();
+
+			pb_Sample root = profiler != null ? profiler.GetRootSample() : null;
 
 			SampleGraph.Draw(selectedSample);
-
-			if(root.children.Count < 1)
-				return;
 
 			DrawTreeView(root);
 		}
@@ -90,8 +88,11 @@ namespace Parabox.Debug
 
 			Color original = GUI.backgroundColor;
 
-			foreach(pb_Sample child in root.children)
-				DrawSampleTree(child);
+			if(root != null)
+			{
+				foreach(pb_Sample child in root.children)
+					DrawSampleTree(child);
+			}
 
 			if(hoveringSample != null)
 			{
@@ -116,8 +117,6 @@ namespace Parabox.Debug
 			if(!row_visibility.ContainsKey(key))
 				row_visibility.Add(key, true);
 
-			Color oldColor = GUI.backgroundColor;
-
 			GUILayout.BeginHorizontal(ProfilerStyles.chartStyle);
 
 				int n = 0;
@@ -131,7 +130,7 @@ namespace Parabox.Debug
 					// don't use a Foldout control because it always eats the current event, which breaks clicking to follow stack trace
 					if(childCount > 0)
 					{
-						GUI.backgroundColor = oldColor;
+						GUI.backgroundColor = Color.white;
 						GUI.color = Color.white;
 						row_visibility[key] = EditorGUILayout.Toggle(row_visibility[key], EditorStyles.foldout, GUILayout.MaxWidth(14));
 					}

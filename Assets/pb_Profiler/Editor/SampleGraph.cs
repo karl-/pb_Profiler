@@ -20,7 +20,7 @@ namespace Parabox.Debug
 		 */
 		public static void Draw(pb_Sample sample)
 		{
-			Rect rect = EditorGUILayout.GetControlRect(false, 200);
+			Rect rect = EditorGUILayout.GetControlRect(false, 150);
 			RectOffset margin = new RectOffset(2, 2, 4, 4);
 			rect.x += margin.left;
 			rect.y += margin.top;
@@ -42,23 +42,18 @@ namespace Parabox.Debug
 				List<long> samples = sample.sampleHistory;
 				int count = samples.Count;
 
-				long min = sample.min, max = sample.max;
-
-				GUIContent label = new GUIContent(ProfilerEditor.TickToString(min));
-				float height = ProfilerStyles.chartAxisLabel.CalcHeight(label, EditorGUIUtility.currentViewWidth);
-				Rect r = new Rect(rect.x + 2, ((rect.y + rect.height) - height) - 2, 200, height);
-				GUI.Label(r, label, ProfilerStyles.chartAxisLabel);
-				r.y = rect.y + 2;
-				GUI.Label(r, ProfilerEditor.TickToString(max), ProfilerStyles.chartAxisLabel);
-
-				label.text = sample.name;
-				r.x = (rect.x + rect.width) - (ProfilerStyles.chartAxisLabel.CalcSize(label).x + 12);
-				GUI.Label(r, label);
-
 				if(count < 3)
 				{
 					GUI.Label(rect, "Too Few Samples to Graph", ProfilerStyles.centeredGrayLabel);
 					return;
+				}
+
+				long min = samples[0], max = samples[0];
+
+				for(int i = 1; i < count; i++)
+				{
+					if(samples[i] < min) min = samples[i];
+					if(samples[i] > max) max = samples[i];
 				}
 
 				MethodInfo mi = typeof(HandleUtility).GetMethod("ApplyWireMaterial", ALL_FLAGS);
@@ -93,12 +88,16 @@ namespace Parabox.Debug
 
 				GL.End();
 
-				// for(int i = 0; i < count; i++)
-				// {
-				// 	r.x = rect.x + (i / (float) (count - 1)) * rect.width;
-				// 	r.y = rect.y + (rect.height - ((samples[i] - min) / (float) (max - min)) * rect.height);
-				// 	GUI.Label(r, ProfilerEditor.TickToString(samples[i]) );
-				// }
+				GUIContent label = new GUIContent(ProfilerEditor.TickToString(min));
+				float height = ProfilerStyles.chartAxisLabel.CalcHeight(label, EditorGUIUtility.currentViewWidth);
+				Rect r = new Rect(rect.x + 2, ((rect.y + rect.height) - height) - 2, 200, height);
+				GUI.Label(r, label, ProfilerStyles.chartAxisLabel);
+				r.y = rect.y + 2;
+				GUI.Label(r, ProfilerEditor.TickToString(max), ProfilerStyles.chartAxisLabel);
+
+				label.text = sample.name;
+				r.x = (rect.x + rect.width) - (ProfilerStyles.chartAxisLabel.CalcSize(label).x + 12);
+				GUI.Label(r, label);
 			}
 		}
 	}

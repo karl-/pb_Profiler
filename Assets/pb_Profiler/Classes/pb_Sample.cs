@@ -32,7 +32,7 @@ namespace Parabox.Debug
 		const int MAX_STACKED_SAMPLES = 1;
 
 		public static int sampleHistorySize = 64;
-		private Queue<long> _sampleHistory = new Queue<long>();
+		private Queue<long> _sampleHistory = null;
 		public List<long> sampleHistory { get { return new List<long>( _sampleHistory ); } }
 
 		internal int timeIndex = 0;
@@ -63,6 +63,7 @@ namespace Parabox.Debug
 			for(int i = 0; i < MAX_STACKED_SAMPLES; i++)
 				times[i] = new System.Diagnostics.Stopwatch();
 
+			_sampleHistory = new Queue<long>(sampleHistorySize);
 			this.name = name;
 			this.parent = parent;
 
