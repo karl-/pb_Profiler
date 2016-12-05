@@ -52,8 +52,7 @@ namespace Parabox.Debug
 			currentEvent = Event.current;
 			pb_Sample root = profiler.GetRootSample();
 
-			if(selectedSample != null)
-				SampleGraph.Draw(selectedSample);
+			SampleGraph.Draw(selectedSample);
 
 			if(root.children.Count < 1)
 				return;
@@ -190,10 +189,7 @@ namespace Parabox.Debug
 				}
 				else
 				{
-					if(selectedSample == sample)
-						selectedSample = null;
-					else
-						selectedSample = sample;
+					selectedSample = sample;
 				}
 			}
 
