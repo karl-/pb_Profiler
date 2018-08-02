@@ -1,0 +1,16 @@
+{
+    "name": "Unity.Karl.Profiler.Editor",
+    "references": [
+        "Unity.Karl.Profiler"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

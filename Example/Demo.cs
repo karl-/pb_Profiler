@@ -3,6 +3,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
+using Parabox.Debug;
 
 public class Demo : Editor
 {
@@ -13,7 +14,7 @@ public class Demo : Editor
 	{
 		// Run some intensive calculations an time them.
 
-		pb_Profiler profiler = new pb_Profiler();
+		pb_Profiler profiler = new pb_Profiler("Demo");
 		float[] rand = new float[SAMPLE_COUNT];
 		bool superBreak = false;
 
@@ -37,7 +38,7 @@ public class Demo : Editor
 			}
 		}
 		profiler.EndSample();
-		
+
 
 		profiler.BeginSample("Do Math with Random Numbers");
 		{
@@ -58,7 +59,7 @@ public class Demo : Editor
 				profiler.EndSample();
 
 				profiler.BeginSample("Cross -> Dot Product");
-				
+
 					profiler.BeginSample("Cross Product");
 						Vector3 f = Vector3.Cross(v0, v1);
 					profiler.EndSample();

@@ -1,0 +1,14 @@
+{
+    "name": "Unity.Karl.Profiler.Example",
+    "references": [
+        "Unity.Karl.Profiler"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

@@ -1,6 +1,23 @@
 pb_Profiler
 ===========
 
+### Quick Start
+
+The profiler is distributed as a package. To install in your project, copy `com.karl.profiler` into your Packages directory.
+
+Ex,
+
+```
+MyProject
+	Assets
+		...
+	Packages
+		com.karl.profiler
+		manifest.json
+```
+
+If you are using a version of Unity prior to 2018.1, install by copying the `com.karl.profiler` folder directly into the assets directory.
+
 ### Brief
 
 A simple profiler class for use in Unity3d, editor or runtime.
